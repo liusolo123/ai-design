@@ -1,6 +1,6 @@
 # DESIGN.md — Glitch Art / 故障艺术
 
-> 版本 1.0 · 2026-11
+> 版本 1.1 · 2026-11
 > 适用：音乐 / 游戏 / 开发者活动、独立品牌、实验影像、H5 传播页
 > 字体：Space Grotesk（标题）/ Inter（正文）/ JetBrains Mono（数据与标签）
 > 使用方式：先读 §2「Hard rules」，按 §3–§9 实现，交付前逐条过 §13。
@@ -32,13 +32,14 @@
 1. 故障只作用于 **≥40px 的标题**、媒体块和 ticker；正文永不 glitch。
 2. 每屏故障元素 ≤ **3** 个（标题 / 媒体块 / ticker 各算一个）。
 3. 闪烁 ≤ **3 次/秒**，单次 ≤ 200ms，间隔 ≥ 5s；禁止全屏亮度反转。
-4. RGB 分离偏移 2–3px；`#FF2D55`・`#00D9FF` 只做偏移和装饰，不做正文颜色。
+4. RGB 分离偏移随字号缩放：`0.04em`（最小 1px、最大 3px）。40px 标题约 1.6px，80px 约 3.2px；不要固定 3px。`#FF2D55`・`#00D9FF` 只做偏移和装饰，不做正文颜色。
 5. 浅灰底 `#E9E9E7` + 纯黑媒体块；**不要**暗底霓虹（那是赛博朋克）。
 6. 扫描线不透明度 ≤ 5%；噪点只出现在媒体块内部。
 7. 数据标签 mono 9–11px + `0.14em`；正文 Inter 14/1.75。
 8. 两栏：左文案、右媒体；≤1080 改上下，媒体横幅 2:1；≤560 改 4:3。
 9. ticker `aria-hidden="true"`；`prefers-reduced-motion` 下停止。
 10. 对比度：红色小字用 `#C81E3C`（4.7:1），`#FF2D55` 仅装饰；青色永不用于文字。
+11. 媒体块必须有“产品自己的材料”层：token 行、代码、界面碎片或真实截图。只有色带和扫描线不算完成。这层若承载信息，不要 `aria-hidden`。
 
 冲突时优先级：**可访问性 > 品牌与内容 > 本文件 > 个人偏好**。
 
@@ -88,6 +89,7 @@
 - 青色只出现在偏移阴影、色带、扫描线里，不做文字、不做按钮底色。
 - 媒体块是唯一允许纯黑的地方；页面其余部分保持浅灰。
 - 深色模式只换底色与文字，不增加发光；色带仍是 3 条，扫描线仍 ≤5%。
+- 终端（代码块）默认放在浅色 `--bg` 上，警告用 `--red`；只有深色终端才用 `#FF6B82`（`--red` 在黑底仅 3.4:1）。
 
 ---
 
@@ -104,16 +106,16 @@
 
 ### 字阶
 
-| Token | size / line-height / tracking | 用途 |
-|---|---|---|
-| `display` | `clamp(40px, 5.8vw, 80px)` / 1.02 / `-0.045em` | H1，最多 2 行 |
-| `h2` | `clamp(28px, 3.6vw, 44px)` / 1.1 / `-0.03em` | 区块标题 |
-| `body` | `14px` / 1.75 / `0` | 正文 |
-| `label` | `10px` / 1 / `0.22em`，大写 | eyebrow |
-| `data` | `9–11px` / 1 / `0.14em`，大写 | 帧号、hex、ticker |
-| `code` | `12px` / 1.9 | 终端块 |
+| Token | size / line-height | tracking（Latin / 中文） | 用途 |
+|---|---|---|---|
+| `display` | `clamp(40px, 5.8vw, 80px)` / 1.02 | `-0.045em` / `-0.02em` | H1，最多 2 行 |
+| `h2` | `clamp(28px, 3.6vw, 44px)` / 1.1 | `-0.03em` / `-0.015em` | 区块标题 |
+| `body` | `14px` / 1.75 | `0` / `0` | 正文 |
+| `label` | `10px` / 1 | `0.22em` / — | eyebrow |
+| `data` | `9–11px` / 1 | `0.14em` / — | 帧号、hex、ticker |
+| `code` | `12px` / 1.9 | — / — | 终端块 |
 
-中文标题用 PingFang SC 700；中文不做全大写、不做负字距超过 `-0.02em`。
+表里的 Latin 值不要直接套在中文上；中文用斜杠后的值。中文标题用 PingFang SC 700，不做全大写、不做超过 `-0.02em` 的负字距。
 
 ---
 
@@ -123,6 +125,7 @@
 
 - max-width `1400px`；页边距 ≥1080 用 `48px`，760–1080 用 `32px`，<760 用 `20px`
 - 首屏：`1.08fr / 0.92fr` 两栏，gap `clamp(24px, 4vw, 56px)`
+- 区段头部：优先两栏（标题左 / 导语右）；单栏时标题 + 导语不超过 8 栏，并与下一行内容在 32px 内接上，不能空到下一节
 - 顶部状态条：左 `Studio_Null`、中 `REC — Signal 98%`、右 `ERR / 0x04`
 - 底部 ticker 贯穿内容宽度，1px 上边线
 
@@ -149,6 +152,7 @@
 | ≥1081 | 两栏；媒体 4:4.7 竖幅 |
 | 560–1080 | 单栏；媒体横幅 2:1 |
 | <560 | 单栏；媒体 4:3；ticker 保留；数据行换行 |
+| <400 | 状态条隐藏 `ERR / 0x04`，`REC 98%` 缩写；H1 保持 2 行 |
 
 ---
 
@@ -167,21 +171,22 @@
 
 ### 标题（RGB 分离）
 
-- 3px 红偏移 + 3px 青偏移，只做 `text-shadow`
+- 偏移量随字号缩放：`0.04em`，最小 1px、最大 3px（40px ≈ 1.6px，80px ≈ 3.2px），只做 `text-shadow`
 - 不复制文本节点；不做 clip-path 切片（会伤可读性）
-- 每 7s 一次 200ms 的轻微位移 burst
+- 每 7s 一次 200ms 的轻微位移 burst；hover 可再触发一次，触屏不触发
 
 ```html
 <h1 class="font-display text-display font-bold
-           [text-shadow:3px_0_rgba(255,45,85,.5),-3px_0_rgba(0,217,255,.55)]">
+           [text-shadow:.04em_0_rgba(255,45,85,.5),-.04em_0_rgba(0,217,255,.55)]">
   让想法，<br>落到屏幕上。
 </h1>
 ```
 
 ### 媒体块
 
-竖幅（桌面）/ 横幅（平板）/ 4:3（手机），内部结构：
+竖幅（桌面）/ 横幅（平板）/ 4:3（手机）。它不是“故障壁纸”，而是产品材料的一帧坏图像。
 
+0. **产品材料层（必须有）**：token 行、代码行、界面碎片或真实截图，占 30–50% 面积，透明度 `.45–.65`。没有这一层，剩下的只是测试卡。
 1. 纯黑底 `--media`
 2. 扫描线：`repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 4px)`
 3. 三条信号带：红 9% 高、青 3%、白 14%，`mix-blend-mode: screen`
@@ -190,12 +195,27 @@
 6. 右下大号轮廓数字（`-webkit-text-stroke: 1px rgba(255,255,255,.16)`）
 7. 角标：`REC`、时间码 `00:04:21:18`、竖排 `ERR_04`
 
+移动端重排（≤560）：
+
+- 大号轮廓数字缩到 64–88px 或直接隐藏；**不得压住时间码**。
+- 像素块 ≤30%，竖向拉丝 ≤18%。
+- 角标保持 8px；时间码始终可读。
+- 产品材料层保留，可减到 2–3 行；它若是纯装饰可 `aria-hidden`，若承载信息则不要。
+
 ```html
 <div class="relative aspect-[4/4.7] overflow-hidden bg-media">
   <div class="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,.05)_0_1px,transparent_1px_4px)]"></div>
   <span class="absolute left-[-10%] top-[20%] h-[9%] w-[120%] bg-[#FF2D55]/80 mix-blend-screen"></span>
   <span class="absolute left-[-10%] top-[45%] h-[3%] w-[120%] bg-[#00D9FF]/90 mix-blend-screen"></span>
   <span class="absolute bottom-3 right-3 font-mono text-[9px] text-white/75">00:04:21:18</span>
+
+  <!-- 0 层：产品材料（token / 代码 / 界面碎片） -->
+  <span class="absolute left-[8%] top-[36%] flex flex-col gap-1.5 font-mono
+               text-[10px] leading-snug tracking-[.06em] text-white/55">
+    <i class="not-italic">--bg #E9E9E7</i>
+    <i class="not-italic translate-x-[3px] text-[#FF2D55]/80">--ink #0A0A0A</i>
+    <i class="not-italic -translate-x-[2px] text-[#00D9FF]/80">--red #C81E3C</i>
+  </span>
 </div>
 ```
 
@@ -215,6 +235,37 @@
 - hover：`translate(2px,-2px)`，并出现红/青双向偏移阴影
 - 不做圆角、不做渐变
 
+### 终端 / 代码块
+
+- 浅色表面（`--bg`），1px 墨线，0 圆角；不要黑底荧光。
+- `12px/1.9` mono，`pre` 横向可滚动；`[ ok ]` 用 `--ink`，`[ !! ]` 用 `--red`。
+- 终端是内容，不要 `aria-hidden`；用 `<pre><code>`，给一个 `aria-label` 说明是示例输出。
+- 若必须用深色终端，警告色改用 `#FF6B82`（`--red` 在 `#0B0B0B` 上只有 3.4:1）。
+
+### 事实表
+
+- 2×2，格子只保留 1px 顶线；标签 9px mono，值 14px / 600。
+- 不画完整边框，不加底色。
+
+### 安装命令 + 复制
+
+- 56px 高，1px 边框；命令 `12px` mono，按钮 92px / 10px mono。
+- 复制成功后按钮反色、文案变“已复制”，用 `role="status"` + `aria-live="polite"` 播报，2.6s 复位。
+- 按钮 `min-height: 56px`；focus-visible 的 outline offset 取 `-4px`（边框内侧）。
+
+### 区段蓝图（产品页）
+
+不要用“三张图标卡片”。故障风格的区段靠线、表和终端建立节奏：
+
+| 区段 | 结构 |
+|---|---|
+| CAPABILITY | 左：标题 + 导语（≤52ch）；下方 3 行：96px 标签 / 标题 / 描述 + `→ 输出` |
+| PIPELINE | 左：导语 + 三行 I/O 表；右：终端 |
+| FACTS | 左：导语 + 一个文字链接；右：2×2 事实表；下方 3 条规则（1px 顶线） |
+| INSTALL | 左：导语 + 链接；右：命令框 + 复制按钮 |
+
+每个区段用 1px 顶线分隔；区段间距 64–96px。
+
 ---
 
 ## 7. 动效
@@ -229,7 +280,7 @@
 
 ### 编排
 
-- 标题：每 7s 一次 200ms 位移 burst；hover 可再触发一次
+- 标题：每 7s 一次 200ms 位移 burst；hover 可再触发一次（仅 `pointerenter`，触屏不触发）
 - 媒体带：4–6.5s 缓慢横移 + `skewY(0.6deg)`
 - ticker：持续横移，作为页面“底噪”
 - 入场：30px 上移 + 透明度，四段 stagger 80ms
@@ -347,13 +398,14 @@ Build a glitch-art editorial [page type] for [audience].
 Read DESIGN.md and treat it as a hard constraint.
 
 Non-negotiables:
-- Light grey #E9E9E7 canvas, black #0B0B0B media panel, 0 radius, no gradients.
-- Display type: Space Grotesk 700, 3px red/cyan text-shadow only, no clip-path slices.
+- Light grey #E9E9E7 canvas, black #0B0B0B media panel, 0 radius; no decorative gradients (scanline/band textures only inside the media panel).
+- Display type: Space Grotesk 700; RGB offsets scale with size (.04em, 1–3px), no clip-path slices.
 - Red #C81E3C for small text; #FF2D55 and #00D9FF are decorative only.
 - Max 3 glitch elements per screen; bursts ≤200ms every 7s; never on body text.
 - One mono ticker, aria-hidden, stopped under prefers-reduced-motion.
-- Media panel: scanlines ≤5%, three signal bands, pixel block, one outline number,
-  timecode and REC labels.
+- Media panel: a product-material layer (token rows / code / UI fragment) at 30–50%,
+  plus scanlines ≤5%, three signal bands, pixel block, one outline number, timecode and REC labels.
+  On mobile, shrink or hide the outline number so it never covers the timecode.
 - Layout: 2 columns desktop, stacked ≤1080 with a 2:1 banner, 4:3 on mobile.
 - Motion: translate/opacity only; no flashing white/black, no full-screen shake.
 
@@ -375,8 +427,17 @@ Output semantic HTML + Tailwind v4, mobile-first, with visible focus states.
 - [ ] 触控目标 ≥44px，焦点环可见
 - [ ] 暗色模式下红/青对比度单独测过
 - [ ] 没有暗底霓虹 / 渐变 / 发光
+- [ ] 媒体块有产品材料层（token / 代码 / 界面碎片），不是纯色带
+- [ ] RGB 偏移按 `0.04em` 缩放，40px 标题时 ≤2px
+- [ ] 320px 无横向滚动，时间码不被轮廓数字压住
+- [ ] 终端警告文字在其所在表面上 ≥4.5:1
+- [ ] 主 CTA 不是死链（或明确标注为示例）
+- [ ] 无 JS 时 `.reveal` 内容仍可见（或提供 noscript）
 - [ ] 页面不引起明显眩晕（自测：盯 30 秒）
 
 ---
 
-变更记录：v1.0 — 初版，基于 style-probe-2 N3。
+变更记录：
+
+- v1.1 — 根据 ai-design-demo 实测补齐：RGB 偏移按字号缩放；媒体块增加产品材料层与移动端重排；补终端 / 事实表 / 安装复制 / 区段蓝图；中文 tracking 单列；补充 320px 与死链验收。
+- v1.0 — 初版，基于 style-probe-2 N3。
