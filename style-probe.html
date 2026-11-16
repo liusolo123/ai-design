@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style Probe · 四屏，四种气质</title>
+<!-- 字体：Inter / Space Grotesk / JetBrains Mono / Instrument Serif / Archivo Black，均为 SIL Open Font License；
+     latin 子集已本地化到 assets/fonts/，中文使用系统 PingFang SC / Songti SC。 -->
+<script>document.documentElement.classList.add('js');</script>
+<style>
+/* ============================================================
+   FONTS —— latin 子集，本地文件；中文走系统字体
+   ============================================================ */
+@font-face { font-family: 'Inter'; src: url('assets/fonts/inter-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('assets/fonts/inter-500.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('assets/fonts/inter-600.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('assets/fonts/space-grotesk-500.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('assets/fonts/space-grotesk-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('assets/fonts/jetbrains-mono-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('assets/fonts/jetbrains-mono-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Instrument Serif'; src: url('assets/fonts/instrument-serif-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Archivo Black'; src: url('assets/fonts/archivo-black-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+
+:root {
+  --f-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  --f-grotesk: 'Space Grotesk', 'Inter', 'PingFang SC', sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --f-serif: 'Instrument Serif', 'Songti SC', 'Times New Roman', serif;
+  --f-black: 'Archivo Black', 'Helvetica Neue', 'PingFang SC', sans-serif;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: #0B0B0C;
+  color: #111;
+  font-family: var(--f-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3, p, ul, figure { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+.s { position: relative; overflow: hidden; }
+
+/* 顶部进度条 */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: #fff;
+  mix-blend-mode: difference;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  z-index: 80;
+  animation: progress linear both;
+  animation-timeline: scroll(root);
+}
+@keyframes progress { to { transform: scaleX(1); } }
+
+/* 底部导航 */
+.jump {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(10, 10, 12, .72);
+  border: 1px solid rgba(255, 255, 255, .14);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .3);
+  z-index: 70;
+  transition: opacity .25s ease, transform .25s ease;
+}
+body:not(.has-scrolled) .jump { opacity: 0; pointer-events: none; transform: translate(-50%, 14px); }
+.jump a {
+  font: 500 11px/1 var(--f-mono);
+  letter-spacing: .06em;
+  color: rgba(255, 255, 255, .55);
+  padding: 9px 12px;
+  border-radius: 999px;
+  transition: background .2s ease, color .2s ease;
+}
+.jump a:hover { color: #fff; }
+.jump a[aria-current="true"] { background: #fff; color: #0A0A0A; }
+
+/* 分区标签 */
+.meta {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px clamp(16px, 4vw, 44px);
+  font: 500 9.5px/1.5 var(--f-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.meta span:nth-child(2) { opacity: .62; }
+
+/* 滚动出现 */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .9s var(--ease), transform .9s var(--ease);
+}
+.js [data-reveal].is-in { opacity: 1; transform: none; }
+.js [data-reveal][data-delay="1"] { transition-delay: .08s; }
+.js [data-reveal][data-delay="2"] { transition-delay: .16s; }
+.js [data-reveal][data-delay="3"] { transition-delay: .24s; }
+
+/* ============================================================
+   INTRO
+   ============================================================ */
+.intro {
+  background: #EDEDE8;
+  color: #111;
+  padding: clamp(24px, 4vw, 44px) clamp(20px, 5vw, 72px) clamp(48px, 8vw, 100px);
+  min-height: 86svh;
+  display: flex;
+  flex-direction: column;
+}
+.intro-top {
+  display: flex;
+  justify-content: space-between;
+  font: 500 9.5px/1 var(--f-mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #6C6C64;
+}
+.intro h1 {
+  margin-top: auto;
+  padding-top: 18vh;
+  font-size: clamp(46px, 8.4vw, 122px);
+  line-height: 1.04;
+  letter-spacing: -.025em;
+  font-weight: 600;
+}
+.intro h1 em { font-family: var(--f-serif); font-style: normal; font-weight: 400; letter-spacing: -.02em; }
+.intro-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: clamp(32px, 6vw, 64px);
+  padding-top: 20px;
+  border-top: 1px solid rgba(17, 17, 17, .18);
+}
+.intro-lede { max-width: 44ch; font-size: 15px; line-height: 1.65; color: #4A4A44; }
+.intro-list { display: flex; flex-wrap: wrap; gap: 6px 18px; font: 500 10px/1.6 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: #6C6C64; }
+.intro-list b { color: #111; font-weight: 500; }
+
+/* ============================================================
+   S1 —— 极简瑞士
+   ============================================================ */
+.s1 {
+  background: #F2F0E9;
+  color: #141414;
+  --line: rgba(20, 20, 20, .16);
+}
+.s1::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(to right, rgba(20, 20, 20, .05) 0 1px, transparent 1px calc(100% / 12));
+}
+.s1 .meta { color: #6B6B63; border-bottom: 1px solid var(--line); }
+.s1-page {
+  position: relative;
+  z-index: 2;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4.5vw, 64px) clamp(36px, 5vw, 64px);
+}
+.s1-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.s1-logo { font-weight: 600; font-size: 14px; letter-spacing: -.02em; }
+.s1-logo sup { font-size: 8px; vertical-align: super; margin-left: 3px; letter-spacing: .1em; }
+.s1-nav nav { display: flex; gap: 26px; font-size: 12.5px; color: #44443E; }
+.s1-nav nav a { position: relative; padding-bottom: 2px; }
+.s1-nav nav a::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%; height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: 100% 50%;
+  transition: transform .3s var(--ease);
+}
+.s1-nav nav a:hover::after { transform: scaleX(1); transform-origin: 0 50%; }
+.s1-cta { font-size: 12.5px; border: 1px solid #141414; padding: 9px 14px; border-radius: 0; transition: background .2s ease, color .2s ease; }
+.s1-cta:hover { background: #141414; color: #F2F0E9; }
+
+.s1-hero {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px;
+  align-items: end;
+  padding: clamp(48px, 7.5vw, 112px) 0 clamp(40px, 6vw, 88px);
+}
+.s1-hero-main { grid-column: span 9; }
+.s1-hero-side { grid-column: span 3; padding-bottom: 10px; }
+.s1-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: #6B6B63;
+}
+.s1-eyebrow i { width: 9px; height: 9px; background: #D9482B; flex: none; }
+.s1-h1 {
+  margin-top: clamp(16px, 2.4vw, 30px);
+  font-family: 'Helvetica Neue', Helvetica, var(--f-sans);
+  font-size: clamp(46px, 8.3vw, 122px);
+  line-height: .95;
+  letter-spacing: -.04em;
+  font-weight: 500;
+}
+.s1-h1 .line { display: block; overflow: hidden; padding-bottom: .04em; }
+.s1-h1 .line > span { display: block; transform: translateY(112%); transition: transform 1.05s var(--ease); }
+.s1-h1.is-in .line > span { transform: none; }
+.s1-h1.is-in .line:nth-child(2) > span { transition-delay: .09s; }
+.s1-hero-side p { font-size: 14px; line-height: 1.65; color: #4A4A44; max-width: 30ch; }
+.s1-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  font-size: 13px;
+  border-bottom: 1px solid #141414;
+  padding-bottom: 3px;
+}
+.s1-link span { transition: transform .3s var(--ease); }
+.s1-link:hover span { transform: translateX(5px); }
+
+.s1-services {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+}
+.s1-services > div { display: flex; flex-direction: column; gap: 7px; }
+.s1-services span { font: 500 10px/1 var(--f-mono); color: #8A8A82; }
+.s1-services h3 { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.s1-services p { font-size: 12.5px; color: #6A6A63; }
+
+/* ============================================================
+   S2 —— 玻璃与极光
+   ============================================================ */
+.s2 { background: #06060B; color: #fff; }
+.s2 .meta { color: rgba(255, 255, 255, .5); border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.s2-bg { position: absolute; inset: 0; z-index: 0; filter: blur(80px); }
+.blob { position: absolute; border-radius: 50%; will-change: transform; }
+.blob.b1 { width: 50vw; height: 50vw; left: -2%; top: -4%; background: radial-gradient(circle at 40% 40%, rgba(124, 92, 255, .9), rgba(124, 92, 255, 0) 68%); animation: drift1 20s ease-in-out infinite alternate; }
+.blob.b2 { width: 42vw; height: 42vw; right: -6%; top: 16%; background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, .55), rgba(34, 211, 238, 0) 66%); animation: drift2 26s ease-in-out infinite alternate; }
+.blob.b3 { width: 46vw; height: 46vw; left: 30%; bottom: -26%; background: radial-gradient(circle at 50% 50%, rgba(255, 92, 168, .5), rgba(255, 92, 168, 0) 68%); animation: drift3 24s ease-in-out infinite alternate; }
+@keyframes drift1 { to { transform: translate(9%, 7%) scale(1.12); } }
+@keyframes drift2 { to { transform: translate(-7%, 9%) scale(1.06); } }
+@keyframes drift3 { to { transform: translate(5%, -9%) scale(1.15); } }
+
+.s2::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.s2-wrap::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 72%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(124, 92, 255, .38), rgba(124, 92, 255, 0) 62%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+.s2-wrap {
+  position: relative;
+  z-index: 3;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(56px, 9vw, 120px) clamp(20px, 4vw, 48px);
+  display: grid;
+  place-items: center;
+  min-height: calc(100svh - 46px);
+}
+.s2-panel {
+  position: relative;
+  width: min(960px, 100%);
+  padding: clamp(28px, 5vw, 64px);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: linear-gradient(150deg, rgba(12, 10, 22, .42), rgba(8, 8, 14, .3) 46%, rgba(12, 10, 22, .38));
+  backdrop-filter: blur(30px) saturate(150%) brightness(1.02);
+  -webkit-backdrop-filter: blur(30px) saturate(150%) brightness(1.02);
+  box-shadow: 0 40px 120px -24px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .24);
+}
+.s2-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  font: 500 9.5px/1 var(--f-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .72);
+  background: rgba(255, 255, 255, .05);
+}
+.s2-eyebrow i { width: 5px; height: 5px; border-radius: 50%; background: #7CFFB2; box-shadow: 0 0 10px #7CFFB2; }
+.s2-h2 {
+  margin-top: clamp(20px, 3vw, 32px);
+  font-size: clamp(38px, 5.8vw, 76px);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+  font-weight: 500;
+  background: linear-gradient(180deg, #fff 45%, rgba(255, 255, 255, .84));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.s2-sub { margin-top: 18px; max-width: 46ch; font-size: 15px; line-height: 1.7; color: rgba(255, 255, 255, .62); }
+.s2-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: clamp(24px, 4vw, 40px); }
+.s2-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0A0A0C;
+  font-size: 13px;
+  font-weight: 500;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.s2-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(255, 255, 255, .22); }
+.s2-ghost {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  font-size: 13px;
+  color: rgba(255, 255, 255, .85);
+  transition: background .25s ease, border-color .25s ease;
+}
+.s2-ghost:hover { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .34); }
+
+.s2-chip {
+  position: absolute;
+  z-index: 4;
+  padding: 10px 15px;
+  border-radius: 999px;
+  background: rgba(10, 10, 16, .5);
+  border: 1px solid rgba(255, 255, 255, .2);
+  backdrop-filter: blur(16px);
+  font: 500 11px/1 var(--f-mono);
+  letter-spacing: .06em;
+  color: rgba(255, 255, 255, .82);
+  animation: float 7s ease-in-out infinite alternate;
+}
+.s2-chip.c1 { top: -54px; right: 6%; transform: rotate(3deg); animation: none; }
+.s2-chip.c2 { bottom: -54px; left: 4%; animation-delay: -3s; }
+@keyframes float { to { transform: translateY(-12px) rotate(-2deg); } }
+
+/* ============================================================
+   S3 —— 新粗野主义
+   ============================================================ */
+.s3 { background: #FFF6DF; color: #0A0A0A; }
+.s3 .meta { color: #3A3A34; border-bottom: 3px solid #0A0A0A; }
+.s3-page { position: relative; z-index: 2; max-width: 1440px; margin: 0 auto; padding: 0 clamp(18px, 4vw, 56px) clamp(40px, 6vw, 72px); }
+.s3-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 3px solid #0A0A0A;
+}
+.s3-logo {
+  background: #0A0A0A;
+  color: #FFD84D;
+  padding: 6px 10px;
+  font: 400 15px/1 var(--f-black);
+  letter-spacing: .02em;
+}
+.s3-nav nav { display: flex; gap: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.s3-nav nav a { border-bottom: 2px solid transparent; padding-bottom: 2px; }
+.s3-nav nav a:hover { border-color: #0A0A0A; }
+.s3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 20px;
+  border: 3px solid #0A0A0A;
+  background: #FFD84D;
+  color: #0A0A0A;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 5px 5px 0 #0A0A0A;
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.s3-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #0A0A0A; background: #fff; }
+.s3-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #0A0A0A; }
+.s3-btn.alt { background: #2B4BFF; color: #fff; }
+
+.s3-hero { position: relative; padding: clamp(40px, 6vw, 76px) 0 clamp(32px, 5vw, 60px); }
+.s3-sticker {
+  position: absolute;
+  top: clamp(26px, 4vw, 48px);
+  right: 2%;
+  transform: rotate(9deg);
+  padding: 8px 12px;
+  background: #FF5CA8;
+  border: 3px solid #0A0A0A;
+  box-shadow: 4px 4px 0 #0A0A0A;
+  font: 700 10px/1 var(--f-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.s3-eyebrow {
+  display: inline-block;
+  padding: 5px 9px;
+  background: #fff;
+  border: 2px solid #0A0A0A;
+  font: 700 10px/1 var(--f-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.s3-h2 {
+  margin-top: 22px;
+  font-family: var(--f-black);
+  font-weight: 900;
+  font-size: clamp(42px, 7.6vw, 104px);
+  line-height: 1.06;
+  letter-spacing: -.025em;
+  text-transform: uppercase;
+}
+.s3-h2 .hl {
+  display: inline-block;
+  background: #FFD84D;
+  box-shadow: 0 0 0 3px #0A0A0A;
+  padding: 0 .06em;
+}
+.s3-sub { margin-top: 22px; max-width: 40ch; font-size: 15px; line-height: 1.65; }
+.s3-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
+
+.s3-marquee {
+  position: relative;
+  overflow: hidden;
+  margin: 12px calc(clamp(18px, 4vw, 56px) * -1) 0;
+  background: #0A0A0A;
+  color: #FFD84D;
+  border-block: 3px solid #0A0A0A;
+  transform: rotate(-1.1deg) scale(1.02);
+}
+.s3-track { display: flex; width: max-content; animation: marquee 26s linear infinite; }
+.s3-track span {
+  display: block;
+  padding: 12px 0;
+  font: 700 13px/1 var(--f-mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-right: 2em;
+}
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+
+.s3-poster {
+  position: absolute;
+  right: 0;
+  top: clamp(80px, 10vw, 130px);
+  width: clamp(190px, 19vw, 264px);
+  aspect-ratio: 1 / 1.08;
+  padding: 16px;
+  background: #2B4BFF;
+  color: #fff;
+  border: 3px solid #0A0A0A;
+  box-shadow: 8px 8px 0 #0A0A0A;
+  transform: rotate(4deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.s3-poster .stars { font: 700 11px/1 var(--f-mono); letter-spacing: .3em; color: #FFD84D; }
+.s3-poster b { font: 400 clamp(64px, 7vw, 96px)/.85 var(--f-black); letter-spacing: -.03em; }
+.s3-poster p { font: 700 10px/1.5 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; }
+
+.s3-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: clamp(44px, 6vw, 72px); }
+.s3-card {
+  background: #fff;
+  border: 3px solid #0A0A0A;
+  box-shadow: 6px 6px 0 #0A0A0A;
+  padding: 18px;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.s3-card:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 #0A0A0A; }
+.s3-card b { display: block; font: 700 11px/1 var(--f-mono); letter-spacing: .1em; color: #6A6A5E; }
+.s3-card h3 { margin: 12px 0 6px; font-size: 18px; letter-spacing: -.01em; }
+.s3-card p { font-size: 13px; line-height: 1.55; color: #4A4A40; }
+
+/* ============================================================
+   S4 —— 赛博朋克
+   ============================================================ */
+.s4 { background: #05070A; color: #E6FFF9; }
+.s4 .meta { color: rgba(0, 240, 255, .55); border-bottom: 1px solid rgba(0, 240, 255, .18); }
+.s4::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 240, 255, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, .055) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 78%);
+}
+.s4::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 240, 255, .04) 0 1px, transparent 1px 4px);
+}
+.s4-page { position: relative; z-index: 3; max-width: 1320px; margin: 0 auto; padding: 0 clamp(18px, 4vw, 56px) clamp(40px, 6vw, 72px); min-height: calc(100svh - 46px); display: flex; flex-direction: column; }
+.s4-hero { flex: 1; }
+.s4-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(0, 240, 255, .2);
+  font: 400 10px/1 var(--f-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(0, 240, 255, .6);
+}
+.s4-logo { color: #E6FFF9; letter-spacing: .08em; }
+.s4-logo b { color: #00F0FF; font-weight: 700; }
+.s4-status { display: inline-flex; align-items: center; gap: 7px; }
+.s4-status i { width: 6px; height: 6px; border-radius: 50%; background: #00F0FF; box-shadow: 0 0 10px #00F0FF; animation: blink 2.4s steps(2, end) infinite; }
+@keyframes blink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: .25; } }
+
+.s4-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+  padding: clamp(44px, 7vw, 96px) 0 clamp(36px, 5vw, 64px);
+}
+.s4-eyebrow { font: 400 10.5px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: #FF2BD6; }
+.s4-h2 {
+  margin-top: 18px;
+  font-size: clamp(40px, 6.4vw, 82px);
+  line-height: 1.02;
+  letter-spacing: .01em;
+  font-weight: 700;
+  color: #E8FFFB;
+  text-shadow: 0 0 24px rgba(0, 240, 255, .28);
+  transition: text-shadow .3s ease;
+}
+.s4-h2:hover { animation: glitch .42s steps(2, end) infinite; }
+@keyframes glitch {
+  0%, 100% { transform: translate(0); text-shadow: 3px 0 rgba(255, 43, 214, .8), -3px 0 rgba(0, 240, 255, .8); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+}
+.s4-sub { margin-top: 20px; max-width: 42ch; font-size: 14px; line-height: 1.8; color: #8AACA6; }
+.s4-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 30px; }
+.s4-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 20px;
+  border: 1px solid #00F0FF;
+  color: #00F0FF;
+  font: 500 12px/1 var(--f-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  box-shadow: 0 0 22px -10px #00F0FF;
+  transition: background .22s ease, box-shadow .22s ease;
+}
+.s4-btn:hover { background: rgba(0, 240, 255, .1); box-shadow: 0 0 0 1px #00F0FF, 0 0 28px -4px rgba(0, 240, 255, .5); }
+.s4-link { font: 400 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: #8AACA6; border-bottom: 1px dashed rgba(138, 172, 166, .5); padding-bottom: 4px; }
+.s4-link:hover { color: #00F0FF; border-color: #00F0FF; }
+
+.s4-term {
+  border: 1px solid rgba(0, 240, 255, .28);
+  background: rgba(0, 240, 255, .035);
+  box-shadow: inset 0 0 40px rgba(0, 240, 255, .05);
+}
+.term-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0, 240, 255, .2);
+  font: 400 10px/1 var(--f-mono);
+  letter-spacing: .1em;
+  color: rgba(0, 240, 255, .55);
+  text-transform: uppercase;
+}
+.term-head em { font-style: normal; letter-spacing: .2em; }
+.s4-term pre {
+  margin: 0;
+  padding: 18px 16px 22px;
+  font: 400 12px/1.9 var(--f-mono);
+  color: #9FF6EA;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.s4-term .c { color: #FF2BD6; }
+.s4-term .g { color: #6E8B86; }
+.s4-term .cursor { color: #00F0FF; animation: blink 1.1s steps(2, end) infinite; }
+
+.s4-readouts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  border-top: 1px solid rgba(0, 240, 255, .2);
+  padding-top: 18px;
+}
+.s4-readouts div { display: flex; flex-direction: column; gap: 8px; }
+.s4-readouts span { font: 400 9.5px/1 var(--f-mono); letter-spacing: .16em; color: #6E8B86; text-transform: uppercase; }
+.s4-readouts b { font: 700 clamp(22px, 2.6vw, 34px)/1 var(--f-mono); color: #E8FFFB; letter-spacing: -.02em; }
+
+/* ============================================================
+   TYPE
+   ============================================================ */
+.stype { background: #ECECE6; color: #111; padding: clamp(52px, 7vw, 100px) clamp(20px, 4.5vw, 64px) clamp(56px, 8vw, 110px); }
+.stype-head { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(24px, 5vw, 64px); align-items: end; max-width: 1280px; margin: 0 auto clamp(40px, 6vw, 72px); }
+.stype-kicker { font: 500 10px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: #6C6C64; margin-bottom: 18px; }
+.stype h2 { font-size: clamp(32px, 4.6vw, 56px); line-height: 1.04; letter-spacing: -.045em; font-weight: 600; }
+.stype-lede { font-size: 14px; line-height: 1.7; color: #5A5A52; max-width: 40ch; }
+
+.specimens { max-width: 1280px; margin: 0 auto; }
+.spec {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 48px);
+  padding: clamp(26px, 3.6vw, 40px) clamp(8px, 1.4vw, 18px);
+  border-top: 1px solid rgba(17, 17, 17, .16);
+  transition: background .2s ease;
+}
+.spec:last-child { border-bottom: 1px solid rgba(17, 17, 17, .16); }
+.spec:hover { background: rgba(255, 255, 255, .55); }
+.spec-no { font: 500 10px/1 var(--f-mono); color: #8A8A80; letter-spacing: .1em; }
+.spec-meta h3 { margin-top: 10px; font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
+.spec-meta .kind { margin-top: 3px; font-size: 11.5px; color: #6C6C64; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+.tags li { font-size: 10.5px; padding: 3px 7px; border: 1px solid rgba(17, 17, 17, .22); color: #44443E; }
+.spec-use { margin-top: 12px; font-size: 11px; line-height: 1.6; color: #6C6C64; }
+
+.spec-body { min-width: 0; }
+.spec-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 22px; }
+.aa { font-size: clamp(40px, 4.6vw, 60px); line-height: 1; letter-spacing: -.03em; }
+.cn { font-size: clamp(22px, 2.6vw, 36px); line-height: 1.3; letter-spacing: -.01em; }
+.latin { margin-top: 12px; font-size: 15px; line-height: 1.5; color: #2E2E29; }
+.nums { margin-top: 8px; font: 400 12px/1.5 var(--f-mono); color: #6C6C64; letter-spacing: .02em; }
+
+.f-inter .aa, .f-inter .cn, .f-inter .latin { font-family: var(--f-sans); }
+.f-grotesk .aa, .f-grotesk .cn, .f-grotesk .latin { font-family: var(--f-grotesk); font-weight: 500; }
+.f-mono .aa, .f-mono .cn, .f-mono .latin { font-family: var(--f-mono); }
+.f-serif .aa, .f-serif .latin { font-family: var(--f-serif); }
+.f-serif .cn { font-family: 'Songti SC', 'STSong', serif; font-weight: 400; }
+.f-black .aa, .f-black .latin { font-family: var(--f-black); }
+.f-black .cn { font-family: 'PingFang SC', var(--f-sans); font-weight: 900; letter-spacing: -.02em; }
+
+.type-foot { max-width: 1280px; margin: 28px auto 0; display: flex; flex-wrap: wrap; gap: 10px 24px; font: 400 11px/1.7 var(--f-mono); color: #6C6C64; }
+
+/* ============================================================
+   PICK
+   ============================================================ */
+.pick { background: #0A0A0B; color: #F2F2ED; padding: clamp(56px, 8vw, 110px) clamp(20px, 4.5vw, 64px) clamp(90px, 12vw, 150px); }
+.pick-inner { max-width: 1120px; margin: 0 auto; }
+.pick-kicker { font: 500 10px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: rgba(255, 255, 255, .4); }
+.pick h2 { margin-top: 20px; font-size: clamp(34px, 5vw, 64px); line-height: 1.04; letter-spacing: -.045em; font-weight: 500; }
+.pick h2 em { font-family: var(--f-serif); font-style: normal; }
+.pick p { margin-top: 20px; max-width: 52ch; font-size: 14px; line-height: 1.75; color: rgba(255, 255, 255, .58); }
+.pick code { font-family: var(--f-mono); font-size: 12px; background: rgba(255, 255, 255, .08); padding: 2px 6px; border-radius: 3px; color: #fff; }
+.pick-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-top: clamp(36px, 5vw, 56px); }
+.pick-card { border-top: 1px solid rgba(255, 255, 255, .18); padding-top: 14px; }
+.pick-card b { display: block; font: 500 10px/1 var(--f-mono); color: rgba(255, 255, 255, .4); letter-spacing: .1em; }
+.pick-card h3 { margin-top: 10px; font-size: 15px; font-weight: 500; }
+.pick-card p { margin-top: 6px; font-size: 12px; line-height: 1.6; color: rgba(255, 255, 255, .45); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1080px) {
+  .s1-hero { grid-template-columns: 1fr; }
+  .s1-hero-main, .s1-hero-side { grid-column: auto; }
+  .s1-hero-side { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .s1-hero-side p { max-width: 40ch; }
+  .s1-link { margin-top: 0; }
+  .s4-hero { grid-template-columns: 1fr; }
+  .s4-term { max-width: 560px; }
+  .stype-head { grid-template-columns: 1fr; align-items: start; }
+}
+
+@media (max-width: 760px) {
+  .meta { flex-wrap: wrap; gap: 4px 18px; }
+  .meta span:nth-child(3) { display: none; }
+  .s1-nav nav { display: none; }
+  .s1-services { grid-template-columns: 1fr; gap: 16px; }
+  .s1-services > div { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; border-top: 1px solid rgba(20, 20, 20, .08); padding-top: 12px; }
+  .s1-services > div:first-child { border-top: 0; padding-top: 0; }
+  .s3-poster { display: none; }
+  .s3-cards { grid-template-columns: 1fr; }
+  .s3-sticker { position: static; display: block; width: max-content; margin-bottom: 16px; transform: rotate(-3deg); }
+  .s3-nav nav { display: none; }
+  .s4-readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+  .s4-clock { display: none; }
+  .spec { grid-template-columns: 1fr; gap: 14px; }
+  .spec-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+  .spec-meta h3 { margin: 0; }
+  .spec-meta .kind { margin: 0; }
+  .tags { margin-top: 0; }
+  .spec-use { display: none; }
+  .pick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .s2-chip { display: none; }
+  .s2-wrap { min-height: 0; padding: 64px 20px 80px; }
+  .jump a { padding: 9px 10px; font-size: 10px; }
+}
+
+@media (max-width: 560px) {
+  .intro-top span:last-child { display: none; }
+}
+
+@media (max-width: 460px) {
+  .intro { min-height: 78svh; }
+  .intro-bottom { flex-direction: column; align-items: flex-start; }
+  .s1-cta { display: none; }
+  .s2-panel { border-radius: 20px; }
+  .s3-h2 { font-size: clamp(40px, 11.5vw, 64px); }
+  .s4-h2 { font-size: clamp(34px, 9vw, 48px); }
+  .specimens .aa { font-size: 34px; }
+  .specimens .cn { font-size: 20px; }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .js [data-reveal] { opacity: 1; transform: none; }
+  .s1-h1 .line > span { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" aria-hidden="true"></div>
+
+<nav class="jump" aria-label="风格导航">
+  <a href="#s1" data-nav="s1">S1</a>
+  <a href="#s2" data-nav="s2">S2</a>
+  <a href="#s3" data-nav="s3">S3</a>
+  <a href="#s4" data-nav="s4">S4</a>
+  <a href="#type" data-nav="type">字体</a>
+</nav>
+
+<!-- ============================ INTRO ============================ -->
+<header class="intro" id="top">
+  <div class="intro-top">
+    <span>Style Probe / 04 Directions</span>
+    <span>2026 · For frontend AI</span>
+  </div>
+  <h1>四屏，<br>四种<em>气质</em>。</h1>
+  <div class="intro-bottom">
+    <p class="intro-lede">
+      同一个页面、同一段文案，四种方向各做一遍。先不用分析，
+      看哪一屏让你想多停两秒——那就是你的偏好。
+    </p>
+    <ul class="intro-list">
+      <li><b>S1</b> 极简瑞士</li>
+      <li><b>S2</b> 玻璃与极光</li>
+      <li><b>S3</b> 新粗野主义</li>
+      <li><b>S4</b> 赛博朋克</li>
+    </ul>
+  </div>
+</header>
+
+<!-- ============================ S1 ============================ -->
+<section class="s s1" id="s1">
+  <div class="meta">
+    <span>S1 / 极简瑞士</span>
+    <span>秩序 · 留白 · 理性</span>
+    <span>#F2F0E9 · #141414 · #D9482B</span>
+  </div>
+
+  <div class="s1-page">
+    <header class="s1-nav">
+      <span class="s1-logo">STUDIO NULL<sup>®</sup></span>
+      <nav aria-label="示例导航">
+        <a href="#s1">作品</a>
+        <a href="#s1">关于</a>
+        <a href="#s1">联系</a>
+      </nav>
+      <span class="s1-cta">开始项目 ↗</span>
+    </header>
+
+    <div class="s1-hero">
+      <div class="s1-hero-main">
+        <p class="s1-eyebrow" data-reveal><i></i>独立设计工作室 · 上海</p>
+        <h2 class="s1-h1" data-reveal>
+          <span class="line"><span>让想法，</span></span>
+          <span class="line"><span>落到屏幕上。</span></span>
+        </h2>
+      </div>
+      <div class="s1-hero-side" data-reveal data-delay="1">
+        <p>品牌、界面与动效。我们把你的产品，讲成一句人话。</p>
+        <span class="s1-link">看作品 <span>→</span></span>
+      </div>
+    </div>
+
+    <div class="s1-services" data-reveal data-delay="2">
+      <div>
+        <span>01</span>
+        <h3>品牌</h3>
+        <p>命名、标识、视觉系统</p>
+      </div>
+      <div>
+        <span>02</span>
+        <h3>界面</h3>
+        <p>网站、产品、设计系统</p>
+      </div>
+      <div>
+        <span>03</span>
+        <h3>动效</h3>
+        <p>交互、过渡、滚动叙事</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ S2 ============================ -->
+<section class="s s2" id="s2">
+  <div class="meta">
+    <span>S2 / 玻璃与极光</span>
+    <span>未来 · 轻 · 氛围</span>
+    <span>#06060B · #7C5CFF · #22D3EE</span>
+  </div>
+
+  <div class="s2-bg" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <div class="s2-wrap">
+    <div class="s2-panel" data-reveal>
+      <div class="s2-chip c1">Brand systems</div>
+      <p class="s2-eyebrow"><i></i>Available for Q1</p>
+      <h2 class="s2-h2">让想法，<br>落到屏幕上。</h2>
+      <p class="s2-sub">品牌、界面与动效。我们把你的产品，讲成一句人话。</p>
+      <div class="s2-actions">
+        <span class="s2-primary">看作品 <span>→</span></span>
+        <span class="s2-ghost">聊聊项目</span>
+      </div>
+      <div class="s2-chip c2">Product UI</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ S3 ============================ -->
+<section class="s s3" id="s3">
+  <div class="meta">
+    <span>S3 / 新粗野主义</span>
+    <span>态度 · 直白 · 反精致</span>
+    <span>#FFF6DF · #0A0A0A · #2B4BFF</span>
+  </div>
+
+  <div class="s3-page">
+    <header class="s3-nav">
+      <span class="s3-logo">NULL*</span>
+      <nav aria-label="示例导航">
+        <a href="#s3">Work</a>
+        <a href="#s3">About</a>
+        <a href="#s3">Contact</a>
+      </nav>
+      <span class="s3-btn">开始项目</span>
+    </header>
+
+    <div class="s3-hero">
+      <span class="s3-sticker" data-reveal>Est. 2021 — Not Boring</span>
+      <div class="s3-poster" aria-hidden="true" data-reveal data-delay="1">
+        <span class="stars">★ ★ ★ ★</span>
+        <b>04</b>
+        <p>Years of making<br>good stuff</p>
+      </div>
+      <p class="s3-eyebrow" data-reveal>独立设计工作室 // 上海</p>
+      <h2 class="s3-h2" data-reveal>
+        让想法，<br>
+        <span class="hl">落到屏幕上。</span>
+      </h2>
+      <p class="s3-sub" data-reveal data-delay="1">品牌、界面与动效。我们把你的产品，讲成一句人话。</p>
+      <div class="s3-actions" data-reveal data-delay="2">
+        <span class="s3-btn">看作品 →</span>
+        <span class="s3-btn alt">聊聊项目</span>
+      </div>
+    </div>
+
+    <div class="s3-marquee" aria-hidden="true">
+      <div class="s3-track">
+        <span>品牌设计 ✱ 界面设计 ✱ 动效 ✱ 不做无聊的页面 ✱ 品牌设计 ✱ 界面设计 ✱ 动效 ✱ 不做无聊的页面 ✱ </span>
+        <span>品牌设计 ✱ 界面设计 ✱ 动效 ✱ 不做无聊的页面 ✱ 品牌设计 ✱ 界面设计 ✱ 动效 ✱ 不做无聊的页面 ✱ </span>
+      </div>
+    </div>
+
+    <div class="s3-cards" data-reveal data-delay="1">
+      <div class="s3-card">
+        <b>01 / BRAND</b>
+        <h3>品牌</h3>
+        <p>命名、标识、视觉系统</p>
+      </div>
+      <div class="s3-card">
+        <b>02 / UI</b>
+        <h3>界面</h3>
+        <p>网站、产品、设计系统</p>
+      </div>
+      <div class="s3-card">
+        <b>03 / MOTION</b>
+        <h3>动效</h3>
+        <p>交互、过渡、滚动叙事</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ S4 ============================ -->
+<section class="s s4" id="s4">
+  <div class="meta">
+    <span>S4 / 赛博朋克</span>
+    <span>硬核 · 夜间 · 系统感</span>
+    <span>#05070A · #00F0FF · #FF2BD6</span>
+  </div>
+
+  <div class="s4-page">
+    <header class="s4-top">
+      <span class="s4-logo">STUDIO_NULL<b>_</b></span>
+      <span class="s4-status"><i></i> System online</span>
+      <span class="s4-clock">31.2304°N 121.4737°E</span>
+    </header>
+
+    <div class="s4-hero">
+      <div>
+        <p class="s4-eyebrow" data-reveal>// 独立设计工作室 · 上海</p>
+        <h2 class="s4-h2" data-reveal>让想法，<br>落到屏幕上。</h2>
+        <p class="s4-sub" data-reveal data-delay="1">品牌、界面与动效。我们把你的产品，讲成一句人话。</p>
+        <div class="s4-actions" data-reveal data-delay="2">
+          <span class="s4-btn">看作品 →</span>
+          <span class="s4-link">聊聊项目</span>
+        </div>
+      </div>
+
+      <aside class="s4-term" data-reveal data-delay="1">
+        <div class="term-head"><span>studio.null — zsh</span><em>● ● ●</em></div>
+        <pre><code><span class="g">$</span> whoami
+studio.null
+<span class="g">$</span> status
+<span class="c">available_for_work</span>
+<span class="g">$</span> ls services
+brand  ui  motion
+<span class="g">$</span> <span class="cursor">█</span></code></pre>
+      </aside>
+    </div>
+
+    <div class="s4-readouts" data-reveal data-delay="2">
+      <div><span>Projects</span><b>012</b></div>
+      <div><span>Awards</span><b>04</b></div>
+      <div><span>Since</span><b>2021</b></div>
+      <div><span>Uptime</span><b>99.99%</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TYPE ============================ -->
+<section class="stype" id="type">
+  <div class="stype-head">
+    <div>
+      <p class="stype-kicker">Type / 05 faces</p>
+      <h2>不知道字体叫什么，<br>就先看气质。</h2>
+    </div>
+    <p class="stype-lede">
+      同一句话，五种字体。每一行都标了它给人的感觉、适合的场景，
+      以及中文该配什么——这些都会写进 DESIGN.md。
+    </p>
+  </div>
+
+  <div class="specimens">
+    <article class="spec f-inter" data-reveal>
+      <div class="spec-meta">
+        <span class="spec-no">01</span>
+        <h3>Inter</h3>
+        <p class="kind">中性无衬线</p>
+        <ul class="tags"><li>克制</li><li>通用</li><li>理性</li></ul>
+        <p class="spec-use">界面正文 / SaaS / 后台</p>
+      </div>
+      <div class="spec-body">
+        <div class="spec-line"><span class="aa">Aa</span><span class="cn">设计是选择，不是装饰。</span></div>
+        <p class="latin">The quick brown fox jumps over the lazy dog.</p>
+        <p class="nums">0123456789 — 12,480 · 99.98% · 240ms</p>
+      </div>
+    </article>
+
+    <article class="spec f-grotesk" data-reveal>
+      <div class="spec-meta">
+        <span class="spec-no">02</span>
+        <h3>Space Grotesk</h3>
+        <p class="kind">几何无衬线</p>
+        <ul class="tags"><li>有性格</li><li>未来</li><li>科技</li></ul>
+        <p class="spec-use">产品标题 / 发布会 / 科技品牌</p>
+      </div>
+      <div class="spec-body">
+        <div class="spec-line"><span class="aa">Aa</span><span class="cn">设计是选择，不是装饰。</span></div>
+        <p class="latin">The quick brown fox jumps over the lazy dog.</p>
+        <p class="nums">0123456789 — 12,480 · 99.98% · 240ms</p>
+      </div>
+    </article>
+
+    <article class="spec f-mono" data-reveal>
+      <div class="spec-meta">
+        <span class="spec-no">03</span>
+        <h3>JetBrains Mono</h3>
+        <p class="kind">等宽</p>
+        <ul class="tags"><li>技术</li><li>精确</li><li>终端</li></ul>
+        <p class="spec-use">代码 / 数据 / HUD 标签 / 小字注释</p>
+      </div>
+      <div class="spec-body">
+        <div class="spec-line"><span class="aa">Aa</span><span class="cn">设计是选择，不是装饰。</span></div>
+        <p class="latin">The quick brown fox jumps over the lazy dog.</p>
+        <p class="nums">0123456789 — 12,480 · 99.98% · 240ms</p>
+      </div>
+    </article>
+
+    <article class="spec f-serif" data-reveal>
+      <div class="spec-meta">
+        <span class="spec-no">04</span>
+        <h3>Instrument Serif</h3>
+        <p class="kind">编辑衬线</p>
+        <ul class="tags"><li>典雅</li><li>编辑</li><li>文学</li></ul>
+        <p class="spec-use">品牌标题 / 杂志 / 长文 / 作品集</p>
+      </div>
+      <div class="spec-body">
+        <div class="spec-line"><span class="aa">Aa</span><span class="cn">设计是选择，不是装饰。</span></div>
+        <p class="latin">The quick brown fox jumps over the lazy dog.</p>
+        <p class="nums">0123456789 — 12,480 · 99.98% · 240ms</p>
+      </div>
+    </article>
+
+    <article class="spec f-black" data-reveal>
+      <div class="spec-meta">
+        <span class="spec-no">05</span>
+        <h3>Archivo Black</h3>
+        <p class="kind">超粗展示</p>
+        <ul class="tags"><li>强横</li><li>海报</li><li>街头</li></ul>
+        <p class="spec-use">大标题 / 海报 / 活动页 / 粗野主义</p>
+      </div>
+      <div class="spec-body">
+        <div class="spec-line"><span class="aa">Aa</span><span class="cn">设计是选择，不是装饰。</span></div>
+        <p class="latin">THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.</p>
+        <p class="nums">0123456789 — 12,480 · 99.98% · 240ms</p>
+      </div>
+    </article>
+  </div>
+
+  <p class="type-foot">
+    <span>中文搭配：PingFang SC / 思源黑体（正文）· Songti SC / 思源宋体（编辑）</span>
+    <span>字号阶梯建议：12 / 14 / 16 / 20 / 28 / 40 / 64 / 96</span>
+  </p>
+</section>
+
+<!-- ============================ PICK ============================ -->
+<section class="pick" id="pick">
+  <div class="pick-inner">
+    <p class="pick-kicker">Next / DESIGN.md</p>
+    <h2>挑一个方向，<br>我来写 <em>DESIGN.md</em>。</h2>
+    <p>
+      回复例如 <code>S2 + 字体 01</code>。我会把色彩 token、字体阶梯、栅格与间距、
+      组件规范、动效编排、以及一段可直接粘贴给 AI 的 prompt 固化下来，
+      配 Tailwind 配置片段和验收清单。
+    </p>
+    <div class="pick-grid">
+      <div class="pick-card">
+        <b>01</b>
+        <h3>选风格</h3>
+        <p>S1–S4，可以多选，也可以组合（比如 S1 的排版 + S2 的材质）。</p>
+      </div>
+      <div class="pick-card">
+        <b>02</b>
+        <h3>选字体</h3>
+        <p>上面 01–05，或“我不确定，你按风格配”。</p>
+      </div>
+      <div class="pick-card">
+        <b>03</b>
+        <h3>说明场景</h3>
+        <p>作品集 / 落地页 / H5，决定栅格与断点怎么写。</p>
+      </div>
+      <div class="pick-card">
+        <b>04</b>
+        <h3>要或不要</h3>
+        <p>有没有必须避开的颜色、动效、组件，提前说。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  // 滚动出现
+  var revealEls = document.querySelectorAll("[data-reveal]");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-in");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+
+    revealEls.forEach(function (el) { io.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add("is-in"); });
+  }
+
+  // 滚动后显示底部导航
+  var body = document.body;
+  function onScroll() {
+    body.classList.toggle("has-scrolled", window.scrollY > 80);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // 底部导航高亮
+  var navLinks = document.querySelectorAll(".jump a[data-nav]");
+  var sections = ["s1", "s2", "s3", "s4", "type"].map(function (id) {
+    return document.getElementById(id);
+  }).filter(Boolean);
+
+  function setActive(id) {
+    navLinks.forEach(function (link) {
+      var on = link.getAttribute("data-nav") === id;
+      if (on) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    });
+  }
+
+  if ("IntersectionObserver" in window) {
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) setActive(entry.target.id);
+      });
+    }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+
+    sections.forEach(function (section) { spy.observe(section); });
+  }
+})();
+</script>
+</body>
+</html>
