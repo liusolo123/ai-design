@@ -193,7 +193,7 @@
 4. 像素块：左上 36%×28%，低透明度网格
 5. 竖向拉丝：`repeating-linear-gradient(90deg, …)` + `blur(2px)`
 6. 右下大号轮廓数字（`-webkit-text-stroke: 1px rgba(255,255,255,.16)`）
-7. 角标：`REC`、时间码 `00:04:21:18`、竖排 `ERR_04`
+7. 角标：`REC` 左上、时间码 `00:04:21:18` 左下、竖排 `ERR_04` 右侧；轮廓数字右下。时间码与轮廓数字**不得重叠**。
 
 移动端重排（≤560）：
 
@@ -207,7 +207,7 @@
   <div class="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,.05)_0_1px,transparent_1px_4px)]"></div>
   <span class="absolute left-[-10%] top-[20%] h-[9%] w-[120%] bg-[#FF2D55]/80 mix-blend-screen"></span>
   <span class="absolute left-[-10%] top-[45%] h-[3%] w-[120%] bg-[#00D9FF]/90 mix-blend-screen"></span>
-  <span class="absolute bottom-3 right-3 font-mono text-[9px] text-white/75">00:04:21:18</span>
+  <span class="absolute bottom-3 left-3 font-mono text-[9px] text-white/75">00:04:21:18</span>
 
   <!-- 0 层：产品材料（token / 代码 / 界面碎片） -->
   <span class="absolute left-[8%] top-[36%] flex flex-col gap-1.5 font-mono
@@ -429,7 +429,7 @@ Output semantic HTML + Tailwind v4, mobile-first, with visible focus states.
 - [ ] 没有暗底霓虹 / 渐变 / 发光
 - [ ] 媒体块有产品材料层（token / 代码 / 界面碎片），不是纯色带
 - [ ] RGB 偏移按 `0.04em` 缩放，40px 标题时 ≤2px
-- [ ] 320px 无横向滚动，时间码不被轮廓数字压住
+- [ ] 320px 无横向滚动，时间码与轮廓数字不重叠
 - [ ] 终端警告文字在其所在表面上 ≥4.5:1
 - [ ] 主 CTA 不是死链（或明确标注为示例）
 - [ ] 无 JS 时 `.reveal` 内容仍可见（或提供 noscript）
@@ -439,5 +439,5 @@ Output semantic HTML + Tailwind v4, mobile-first, with visible focus states.
 
 变更记录：
 
-- v1.1 — 根据 ai-design-demo 实测补齐：RGB 偏移按字号缩放；媒体块增加产品材料层与移动端重排；补终端 / 事实表 / 安装复制 / 区段蓝图；中文 tracking 单列；补充 320px 与死链验收。
+- v1.1 — 根据 ai-design-demo 实测补齐：RGB 偏移按字号缩放；媒体块增加产品材料层与移动端重排、时间码与轮廓数字分居左右；补终端 / 事实表 / 安装复制 / 区段蓝图；中文 tracking 单列；补充 320px 与死链验收。
 - v1.0 — 初版，基于 style-probe-2 N3。
