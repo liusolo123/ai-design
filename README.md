@@ -4,7 +4,7 @@
 
 每份 `DESIGN.md` 不是灵感板，而是一份约束文件：**硬规则、色彩与字体 token、布局、组件、动效、文案、Tailwind v4 配置、可直接粘贴的 prompt、验收清单**。把它交给 Claude Code / Cursor / ChatGPT，让 AI 在写代码时不能自由发挥，你负责验收。
 
-![五种风格预览](style-probe-2-preview.png)
+![第二组视觉样本：新古典 / 故障 / 拼贴](style-probe-2-preview.png)
 
 ## 五种风格
 
@@ -59,6 +59,8 @@
 ## 本地预览
 
 直接用浏览器打开 `style-probe.html` 或 `style-probe-2.html`。字体已本地化在 `assets/fonts/`，离线也能看；每个页面底部有 N1–N4 / S1–S4 导航，最后一屏是字体样本。
+
+> 在 GitHub 上直接点开 HTML 只会看到源码；要看到渲染效果，请克隆到本地打开，或开启仓库的 GitHub Pages。
 
 ## 字体
 
