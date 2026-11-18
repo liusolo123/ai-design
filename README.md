@@ -78,4 +78,5 @@
 ## 许可
 
 - 文档内容 © liusolo123。
-- 字体为 SIL Open Font License，可自由使用与再分发。
+- 六款拉丁字体均为 **SIL OFL 1.1**：可商用、可修改、可再分发；再分发字体文件时请保留 [`assets/fonts/LICENSES/`](assets/fonts/LICENSES/) 中的许可证与版权行。详见 [`assets/fonts/README.md`](assets/fonts/README.md)。
+- 中文 `PingFang SC` / `Songti SC` 是系统字体，未随仓库分发，也不能自行打包再分发；需要跨平台一致时改用 Noto Sans SC / Noto Serif SC（OFL）。

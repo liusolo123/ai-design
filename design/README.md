@@ -49,7 +49,7 @@
 
 ## 字体
 
-六款字体都来自 Google Fonts（SIL OFL），本地 latin 子集在 `../assets/fonts/`：
+六款字体都来自 Google Fonts（SIL OFL），本地 latin 子集在 `../assets/fonts/`；商用与再分发说明见 [`../assets/fonts/README.md`](../assets/fonts/README.md)。
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
