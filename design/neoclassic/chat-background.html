@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>书页留白 · 聊天背景对比</title>
+  <link rel="stylesheet" href="../../assets/fonts/fonts.css">
+  <style>
+    :root {
+      --paper: #F4EFE4;
+      --surface: #FBF7EE;
+      --ink: #1C1A17;
+      --muted: #5C5448;
+      --line: #D8D0BF;
+      --gold: #9A7B4F;
+      --gold-ink: #7A5C34;
+      --reading-width: 760px;
+      font: 15px/1.7 Inter, "PingFang SC", system-ui, sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input { font: inherit; }
+    :focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+    .serif { font-family: "Cormorant Garamond", "Songti SC", "Noto Serif CJK SC", serif; }
+    h1, h2, p { margin: 0; }
+    .svg-defs { position: absolute; width: 0; height: 0; }
+    .preview-bar { min-height: 58px; padding: 8px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); }
+    .preview-bar h1 { font-size: 17px; font-weight: 500; }
+    .compare { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+    .compare label { position: relative; display: grid; place-items: center; padding: 0 14px; min-height: 44px; cursor: pointer; }
+    .compare input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .compare label:has(:checked) { background: #EDE4D5; }
+    .compare label:has(:focus-visible) { outline: 2px solid var(--gold-ink); }
+    .chat { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: calc(100svh - 58px); }
+    .sidebar { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 24px 20px 14px; border-right: 1px solid var(--line); }
+    .brand { display: flex; gap: 12px; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--line); font-size: 23px; }
+    .brand svg { flex: 0 0 36px; width: 36px; height: 36px; color: var(--gold-ink); }
+    .sidebar h2 { font-size: 18px; font-weight: 500; margin: 14px 0 5px; }
+    .sidebar ul { padding: 0; margin: 0; list-style: none; }
+    .sidebar li { padding: 7px 10px; }
+    .sidebar li[aria-current] { background: #EDE4D5; font-weight: 600; }
+    .sidebar footer { padding-top: 10px; border-top: 1px solid var(--line); color: var(--muted); }
+    .bookplate-slot { display: grid; place-items: center; container: sidebar-gap / size; }
+    .bookplate { display: none; width: 92px; height: 92px; color: var(--gold); opacity: .22; pointer-events: none; }
+    @container sidebar-gap (min-height: 140px) {
+      .bookplate { display: block; }
+    }
+
+    .conversation { min-width: 0; background: var(--paper); container: conversation / inline-size; display: grid; grid-template-rows: auto 1fr; }
+    .conversation header { min-height: 49px; padding: 8px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .conversation header h2 { font-size: 21px; font-weight: 500; }
+    .conversation header span { font-size: 13px; color: var(--muted); }
+    .page { display: grid; grid-template-columns: minmax(16px, 1fr) minmax(0, var(--reading-width)) minmax(16px, 1fr); grid-template-rows: 1fr auto; }
+    .reading { grid-area: 1 / 2; padding: 24px 0 20px; overflow-wrap: anywhere; }
+    .reading h2 { margin: 22px 0 8px; font-size: 21px; }
+    .reading ul { margin: 8px 0 12px; padding-inline-start: 24px; }
+    .reading table { width: 100%; border-collapse: collapse; text-align: start; margin-bottom: 20px; }
+    .reading th, .reading td { text-align: start; vertical-align: top; border: 1px solid var(--line); padding: 6px 10px; }
+    .page-edge { grid-area: 1 / 3 / -1; display: none; justify-items: center; align-content: space-between; padding-block: 26px; pointer-events: none; }
+    .corner { position: relative; width: 40px; height: 40px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); }
+    .corner::after { content: ""; position: absolute; inset: 5px 5px auto auto; width: 26px; height: 26px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); }
+    .corner:last-child { transform: scaleY(-1); }
+    @container conversation (min-width: 952px) {
+      .page-edge { display: grid; }
+    }
+    body:has(#plain:checked) :is(.bookplate, .page-edge) { visibility: hidden; }
+
+    .composer { grid-area: 2 / 2; min-width: 0; margin: 0 0 20px; display: grid; grid-template-columns: minmax(0, 1fr) 44px 44px; gap: 4px; padding: 7px; border: 1px solid #B6AA96; border-radius: 16px; background: var(--surface); }
+    .composer:focus-within { border-color: var(--gold-ink); }
+    .composer input { min-width: 0; width: 100%; border: 0; background: transparent; color: var(--ink); padding: 0 8px; font-size: 16px; border-radius: 8px; }
+    .composer :disabled { opacity: 1; }
+    .composer input::placeholder { color: var(--muted); opacity: 1; }
+    .composer button { width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--muted); padding: 0; }
+    .composer .send { background: #E7DECF; color: #645A4A; }
+    .composer svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    @media (max-width: 680px) {
+      .chat { grid-template-columns: minmax(0, 1fr); }
+      .sidebar { grid-template-rows: auto; padding: 10px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .sidebar > :not(.brand) { display: none; }
+      .brand { padding: 0; border: 0; font-size: 19px; }
+      .brand svg { flex-basis: 30px; width: 30px; height: 30px; }
+      .preview-bar, .conversation header { padding-inline: 16px; }
+    }
+    @media (forced-colors: active) {
+      .bookplate, .page-edge { display: none; }
+      .compare label:has(:checked) { outline: 1px solid Highlight; }
+    }
+  </style>
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="book" viewBox="0 0 24 24">
+      <path d="M12 7v14M12 7C9 5 6 4 2 4v14c4 0 7 1 10 3 3-2 6-3 10-3V4c-4 0-7 1-10 3Z" fill="none" stroke="currentColor" stroke-width="1"/>
+    </symbol>
+  </svg>
+  <header class="preview-bar">
+    <h1>聊天背景对比</h1>
+    <fieldset class="compare" aria-label="背景样式">
+      <label><input id="plain" type="radio" name="background">纯色</label>
+      <label><input id="decorated" type="radio" name="background" checked>书页留白</label>
+    </fieldset>
+  </header>
+  <div class="chat">
+    <aside class="sidebar" aria-label="会话列表样例">
+      <div>
+        <div class="brand serif"><svg viewBox="0 0 36 36" aria-hidden="true"><rect x=".5" y=".5" width="35" height="35" fill="none" stroke="currentColor"/><rect x="3.5" y="3.5" width="29" height="29" fill="none" stroke="currentColor"/><use href="#book" x="8" y="8" width="20" height="20"/></svg>个人助理</div>
+        <div class="session-list"><h2 class="serif">会话</h2><ul><li aria-current="page">主会话</li><li>学习</li><li>运动</li><li>已归档</li></ul></div>
+      </div>
+      <div class="bookplate-slot" aria-hidden="true">
+        <svg class="bookplate" viewBox="0 0 92 92" focusable="false">
+          <rect x=".5" y=".5" width="91" height="91" fill="none" stroke="currentColor"/>
+          <rect x="5.5" y="5.5" width="81" height="81" fill="none" stroke="currentColor"/>
+          <use href="#book" x="25" y="25" width="42" height="42"/>
+        </svg>
+      </div>
+      <footer><ul><li>目标</li><li>长期记忆</li></ul></footer>
+    </aside>
+    <main class="conversation">
+      <header><h2 class="serif">主会话</h2><span>示例会话</span></header>
+      <div class="page">
+        <article class="reading">
+          <table>
+            <thead><tr><th scope="col">安排</th><th scope="col">放在什么时候</th><th scope="col">完成标准</th></tr></thead>
+            <tbody><tr><td>整理阅读笔记</td><td>周六上午</td><td>每篇留一句能复述的摘要</td></tr><tr><td>回顾本周任务</td><td>周日傍晚</td><td>选出下周优先做的两件事</td></tr></tbody>
+          </table>
+          <p>你已经把想读的内容分成了三个主题。这周可以先从最关心的一个开始，其余继续留在清单里。</p>
+          <h2 class="serif">这周怎么安排</h2>
+          <p>周六留出一段连续时间精读。读完先用自己的话写下作者的主要观点，再记下一处你想追问的地方。</p>
+          <ul><li>先选一篇，不追求一次读完一个主题。</li><li>摘录和自己的理解分开记录，方便下次回看。</li><li>周日只回顾已记下的问题，不追加任务。</li></ul>
+          <h2 class="serif">下次从哪里继续</h2>
+          <p>把没有想清楚的问题留在笔记末尾。下次打开时，从那个问题继续，而不是重新翻找上次的进度。</p>
+        </article>
+        <div class="page-edge" aria-hidden="true"><span class="corner"></span><span class="corner"></span></div>
+        <div class="composer" aria-label="消息输入区样例">
+          <input aria-label="消息" placeholder="发送消息给助理" disabled>
+          <button aria-label="添加附件" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.2-9.19a4 4 0 1 1 5.65 5.66l-9.2 9.19a2 2 0 0 1-2.82-2.83l8.49-8.48"/></svg></button>
+          <button class="send" aria-label="发送消息" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 7-7 7 7M12 19V5"/></svg></button>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
